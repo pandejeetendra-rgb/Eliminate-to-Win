@@ -1,0 +1,844 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Eliminate-to-Win — Wi-Fi Security (GBL)</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --panel:#0f1b33;
+      --card:#132246;
+      --ink:#eaf0ff;
+      --muted:#b9c6e6;
+      --accent:#4ea1ff;
+      --good:#30d158;
+      --bad:#ff453a;
+      --warn:#ffd60a;
+      --shadow: 0 10px 25px rgba(0,0,0,.35);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 800px at 20% 0%, #172a59 0%, var(--bg) 55%) fixed;
+      color:var(--ink);
+    }
+    .wrap{max-width:1100px;margin:0 auto;padding:18px}
+    header{
+      display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+      padding:14px 14px;background:rgba(19,34,70,.6);border:1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius); box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{
+      width:40px;height:40px;border-radius:12px;
+      background: linear-gradient(135deg, var(--accent), #9b5cff);
+      box-shadow: 0 10px 18px rgba(78,161,255,.25);
+    }
+    h1{font-size:16px;margin:0}
+    .sub{font-size:12px;color:var(--muted);margin:2px 0 0}
+    .hud{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 10px;border-radius:999px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.09);
+      color:var(--muted); font-size:12px;
+    }
+    .pill b{color:var(--ink);font-weight:700}
+    .btn{
+      cursor:pointer;
+      border:none;
+      padding:10px 12px;border-radius:12px;
+      background: rgba(255,255,255,.08);
+      color:var(--ink);
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: 0 6px 14px rgba(0,0,0,.25);
+      transition: transform .08s ease, background .15s ease;
+      font-weight:600;
+    }
+    .btn:active{transform: translateY(1px)}
+    .btn.primary{
+      background: linear-gradient(135deg, var(--accent), #6b7cff);
+      border:none;
+    }
+    .btn.danger{
+      background: rgba(255,69,58,.14);
+      border:1px solid rgba(255,69,58,.35);
+    }
+    main{margin-top:14px;display:grid;grid-template-columns:1.4fr .6fr;gap:14px}
+    @media (max-width: 980px){ main{grid-template-columns:1fr} }
+
+    .panel{
+      padding:16px;background:rgba(19,34,70,.55);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+    .qtitle{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .qtitle h2{
+      margin:0;font-size:18px;line-height:1.25;
+    }
+    .qmeta{
+      font-size:12px;color:var(--muted);
+      padding:8px 10px;border-radius:12px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      white-space:nowrap;
+    }
+    .question{
+      margin:0 0 12px;
+      font-size:15px;color:var(--ink);
+      padding:12px 12px;
+      border-radius:14px;
+      background: rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.07);
+    }
+
+    .grid{
+      display:grid; grid-template-columns:repeat(2, minmax(0,1fr));
+      gap:12px;
+    }
+    @media (max-width: 720px){ .grid{grid-template-columns:1fr} }
+
+    .opt{
+      position:relative;
+      padding:14px 14px;
+      border-radius:16px;
+      background: rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.10);
+      cursor:pointer;
+      user-select:none;
+      transition: transform .10s ease, background .15s ease, border .15s ease, opacity .18s ease;
+      min-height:64px;
+      display:flex;gap:10px;align-items:flex-start;
+      overflow:hidden;
+    }
+    .opt:hover{background: rgba(255,255,255,.08)}
+    .opt:active{transform: translateY(1px)}
+    .badge{
+      width:28px;height:28px;border-radius:10px;
+      display:grid;place-items:center;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+      color:var(--muted);
+      font-weight:800;font-size:12px;flex:0 0 auto;
+    }
+    .opt .txt{font-size:14px;line-height:1.25;color:var(--ink)}
+    .opt.eliminated{
+      opacity:.22;
+      transform: scale(.98);
+      cursor:default;
+      pointer-events:none;
+    }
+    .opt.eliminated::after{
+      content:"ELIMINATED";
+      position:absolute; inset:auto 10px 10px auto;
+      font-size:11px; font-weight:900; letter-spacing:.06em;
+      color: rgba(255,255,255,.75);
+      background: rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.15);
+      padding:6px 8px;border-radius:999px;
+    }
+
+    .toast{
+      position:fixed;left:50%;top:14px;transform:translateX(-50%);
+      z-index:999;
+      background: rgba(15,27,51,.9);
+      border:1px solid rgba(255,255,255,.12);
+      color:var(--ink);
+      padding:12px 14px;border-radius:16px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+      max-width:min(720px, calc(100vw - 24px));
+      display:none;
+      align-items:flex-start;gap:10px;
+    }
+    .toast.show{display:flex;animation: pop .22s ease-out}
+    @keyframes pop{from{opacity:0;transform:translateX(-50%) translateY(-8px)} to{opacity:1;transform:translateX(-50%) translateY(0)}}
+    .toast .dot{
+      width:10px;height:10px;border-radius:999px;margin-top:5px;flex:0 0 auto;
+      background: var(--warn);
+      box-shadow: 0 0 0 4px rgba(255,214,10,.14);
+    }
+    .toast.good .dot{background: var(--good); box-shadow:0 0 0 4px rgba(48,209,88,.14)}
+    .toast.bad .dot{background: var(--bad); box-shadow:0 0 0 4px rgba(255,69,58,.14)}
+    .toast h3{margin:0 0 3px;font-size:14px}
+    .toast p{margin:0;color:var(--muted);font-size:13px;line-height:1.3}
+
+    .side h3{margin:0 0 8px;font-size:14px}
+    .hint{
+      padding:10px 12px;border-radius:14px;
+      background: rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.07);
+      color:var(--muted);font-size:13px;line-height:1.35;
+      margin-bottom:12px;
+    }
+    .stat{
+      display:grid;grid-template-columns:1fr 1fr;gap:10px;
+      margin-top:10px;
+    }
+    .tile{
+      padding:12px;border-radius:16px;
+      background: rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .tile .k{font-size:12px;color:var(--muted)}
+    .tile .v{font-size:18px;font-weight:900;margin-top:4px}
+    .footerBtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .small{font-size:12px;color:var(--muted);margin-top:10px}
+
+    .overlay{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      display:none; align-items:center; justify-content:center;
+      padding:16px; z-index:1000;
+    }
+    .overlay.show{display:flex}
+    .modal{
+      width:min(880px, 100%);
+      background: rgba(19,34,70,.92);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding:16px;
+      backdrop-filter: blur(10px);
+    }
+    .modal header{
+      background: transparent;
+      border:none;
+      box-shadow:none;
+      padding:0;margin-bottom:10px;
+    }
+    .modal h2{margin:0;font-size:18px}
+    .modal .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width: 820px){ .modal .grid2{grid-template-columns:1fr} }
+    .review{
+      padding:12px;border-radius:16px;
+      background: rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .review .rQ{font-size:13px;color:var(--ink);margin:0 0 8px}
+    .review .rA{font-size:13px;color:var(--muted);margin:0}
+    .tag{
+      display:inline-flex;align-items:center;gap:6px;
+      font-size:12px;font-weight:800;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      margin-top:10px;
+    }
+    .tag.good{border-color: rgba(48,209,88,.35); background: rgba(48,209,88,.12)}
+    .tag.bad{border-color: rgba(255,69,58,.35); background: rgba(255,69,58,.12)}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Eliminate-to-Win — Wi-Fi Security (GBL)</h1>
+          <div class="sub">Eliminate all wrong options. Content from the attached Wi-Fi Security chapter.</div>
+        </div>
+      </div>
+
+      <div class="hud">
+        <div class="pill">Round <b id="hudRound">1</b>/<span id="hudTotal">1</span></div>
+        <div class="pill">Eliminated <b id="hudElim">0</b></div>
+        <div class="pill">Attempts <b id="hudAttempts">0</b></div>
+        <button class="btn" id="btnRestart" title="Restart current round">Restart round</button>
+        <button class="btn danger" id="btnResetAll" title="Clear saved progress">Reset all</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="panel" aria-live="polite">
+        <div class="qtitle">
+          <h2 id="qHeading">Question</h2>
+          <div class="qmeta" id="qMeta">Select wrong options to eliminate</div>
+        </div>
+
+        <p class="question" id="qText">...</p>
+        <div class="grid" id="optionsGrid" role="list"></div>
+
+        <div class="small" id="microNote">
+          Tip: The correct option will NOT disappear. Only eliminate wrong ones.
+        </div>
+      </section>
+
+      <aside class="panel side">
+        <h3>How to play</h3>
+        <div class="hint">
+          1) Tap/click an option you believe is <b>wrong</b> to eliminate it.<br/>
+          2) Keep eliminating wrong options.<br/>
+          3) When only the correct option remains, you win the round.
+        </div>
+
+        <h3>Feedback</h3>
+        <div class="hint" id="feedbackBox">
+          You will see short feedback each time you eliminate an option.
+        </div>
+
+        <div class="stat" aria-label="Stats">
+          <div class="tile">
+            <div class="k">Rounds completed</div>
+            <div class="v" id="statDone">0</div>
+          </div>
+          <div class="tile">
+            <div class="k">Total wrong eliminated</div>
+            <div class="v" id="statElimTotal">0</div>
+          </div>
+        </div>
+
+        <div class="footerBtns">
+          <button class="btn primary" id="btnNext">Next round</button>
+          <button class="btn" id="btnReveal">Reveal correct (end)</button>
+        </div>
+
+        <div class="small">
+          Instructor note: edit the question bank in JS (search <b>QUESTION BANK</b>).
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="assertive">
+    <div class="dot" aria-hidden="true"></div>
+    <div>
+      <h3 id="toastTitle">Info</h3>
+      <p id="toastText">...</p>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-label="Game summary">
+    <div class="modal">
+      <header>
+        <div>
+          <h2 id="endTitle">Summary</h2>
+          <div class="sub" id="endSub">Your performance summary.</div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn" id="btnCloseSummary">Close</button>
+          <button class="btn primary" id="btnPlayAgain">Play again</button>
+        </div>
+      </header>
+
+      <div class="grid2">
+        <div class="review">
+          <p class="rQ"><b>Overall</b></p>
+          <p class="rA" id="endStats">...</p>
+          <div class="tag good" id="tagDone">✅ Completed</div>
+        </div>
+
+        <div class="review">
+          <p class="rQ"><b>Correct answers</b></p>
+          <div id="endAnswers"></div>
+        </div>
+      </div>
+
+      <div class="small" style="margin-top:10px">
+        Use “Reveal correct (end)” anytime to see correct answers after playing.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /******************************************************************
+     * Eliminate-to-Win — Wi-Fi Security (Chapter-based)
+     ******************************************************************/
+
+    /******************** QUESTION BANK (FROM CHAPTER) *****************
+     * Rule: ONE correct option per question.
+     * Learner must eliminate all wrong options to win the round.
+     ******************************************************************/
+    const QUESTIONS = [
+      {
+        id: "WIFI-Q1",
+        prompt: "Wireless security mainly depends on which set of factors (as described in the chapter)?",
+        options: [
+          { text: "Encryption strength, monitoring suspicious activity, and user awareness", isCorrect: true,  whyWrong: "" },
+          { text: "Only hiding the SSID", isCorrect: false, whyWrong: "SSID hiding alone is not sufficient; the chapter stresses encryption + monitoring + awareness." },
+          { text: "Only buying expensive routers", isCorrect: false, whyWrong: "Cost does not automatically ensure security; configuration and controls matter." },
+          { text: "Using public Wi-Fi more often to test speed", isCorrect: false, whyWrong: "Public Wi-Fi increases risk; it is not a security factor." }
+        ],
+        explainCorrect: "The chapter highlights encryption, monitoring, and user awareness as key pillars of wireless security."
+      },
+      {
+        id: "WIFI-Q2",
+        prompt: "Which encryption choice is recommended over WEP for stronger Wi-Fi security?",
+        options: [
+          { text: "WEP (Wired Equivalent Privacy)", isCorrect: false, whyWrong: "WEP is described as broken/weak and easy to crack." },
+          { text: "WPA2 (Wi-Fi Protected Access 2)", isCorrect: true,  whyWrong: "" },
+          { text: "No encryption (open network)", isCorrect: false, whyWrong: "Open networks allow easy sniffing/eavesdropping." },
+          { text: "Using SSID as the password", isCorrect: false, whyWrong: "SSID is a network name, not a secure encryption key." }
+        ],
+        explainCorrect: "The chapter recommends using WPA2 (stronger than WEP) for better protection."
+      },
+      {
+        id: "WIFI-Q3",
+        prompt: "Why is WEP considered insecure according to the chapter?",
+        options: [
+          { text: "It is known to be broken and can be cracked in minutes/hours", isCorrect: true,  whyWrong: "" },
+          { text: "It requires two-factor authentication", isCorrect: false, whyWrong: "WEP does not provide 2FA; it uses shared keys." },
+          { text: "It automatically blocks sniffing and war driving", isCorrect: false, whyWrong: "WEP does not reliably prevent sniffing; war driving targets weak networks." },
+          { text: "It forces VPN usage by default", isCorrect: false, whyWrong: "VPN is a separate control; WEP does not enforce it." }
+        ],
+        explainCorrect: "The chapter explicitly states WEP is weak/broken and can be cracked relatively quickly."
+      },
+      {
+        id: "WIFI-Q4",
+        prompt: "What is a good practice related to router login credentials?",
+        options: [
+          { text: "Keep default username/password for convenience", isCorrect: false, whyWrong: "The chapter warns many users keep defaults (e.g., admin/admin), making unauthorized access easier." },
+          { text: "Change default username/password to strong credentials", isCorrect: true,  whyWrong: "" },
+          { text: "Share router password publicly to avoid lockouts", isCorrect: false, whyWrong: "Sharing credentials increases the chance of misuse and unauthorized access." },
+          { text: "Use blank password so you don’t forget it", isCorrect: false, whyWrong: "Blank/weak passwords are high risk; the chapter discourages this." }
+        ],
+        explainCorrect: "Changing default credentials is a core recommendation to reduce unauthorized access."
+      },
+      {
+        id: "WIFI-Q5",
+        prompt: "Why does the chapter advise disabling auto-connect to available networks?",
+        options: [
+          { text: "It reduces risk of connecting to rogue APs / phishing hotspots", isCorrect: true,  whyWrong: "" },
+          { text: "It increases Wi-Fi speed automatically", isCorrect: false, whyWrong: "Auto-connect is not a speed feature; it is a connection behavior." },
+          { text: "It makes SSID invisible to everyone", isCorrect: false, whyWrong: "Auto-connect does not hide SSID; it affects device connection decisions." },
+          { text: "It replaces encryption with MAC filtering", isCorrect: false, whyWrong: "These are different controls; auto-connect is unrelated to encryption replacement." }
+        ],
+        explainCorrect: "Auto-connect can make users associate with attacker-controlled rogue APs more easily."
+      },
+      {
+        id: "WIFI-Q6",
+        prompt: "Which statement best matches the chapter’s guidance on public Wi-Fi?",
+        options: [
+          { text: "Avoid using public Wi-Fi for sensitive websites because traffic may be sniffed or sessions hijacked", isCorrect: true,  whyWrong: "" },
+          { text: "Public Wi-Fi is always encrypted, so it is safest for banking", isCorrect: false, whyWrong: "The chapter notes many public networks are open/unencrypted, enabling sniffing." },
+          { text: "If the Wi-Fi name includes 'Secure', it is safe", isCorrect: false, whyWrong: "Attackers can use luring SSIDs like 'SecureConnect' to mislead users." },
+          { text: "HTTPS is never used on the internet, so it doesn’t matter", isCorrect: false, whyWrong: "HTTPS matters; the chapter mentions risks when traffic is not protected end-to-end." }
+        ],
+        explainCorrect: "Public open Wi-Fi can expose unencrypted traffic and session identifiers, enabling hijacking."
+      },
+      {
+        id: "WIFI-Q7",
+        prompt: "What is a recommended action regarding SSID (network name)?",
+        options: [
+          { text: "Change the default SSID (and avoid revealing organization/vendor info)", isCorrect: true,  whyWrong: "" },
+          { text: "Keep the default SSID to show the router brand", isCorrect: false, whyWrong: "Default SSID can signal careless configuration and invite probing." },
+          { text: "Use your company name and phone number as SSID", isCorrect: false, whyWrong: "The chapter advises avoiding easily guessable organization-linked SSIDs." },
+          { text: "SSID alone provides strong encryption", isCorrect: false, whyWrong: "SSID is an identifier, not encryption." }
+        ],
+        explainCorrect: "Changing default SSID and avoiding identifiable details reduces easy targeting."
+      },
+      {
+        id: "WIFI-Q8",
+        prompt: "Which control is suggested to restrict who can connect to a Wi-Fi router?",
+        options: [
+          { text: "MAC filtering and allowing only trusted devices", isCorrect: true,  whyWrong: "" },
+          { text: "Disabling the firewall", isCorrect: false, whyWrong: "Firewall is recommended; disabling it weakens security." },
+          { text: "Turning on auto-connect", isCorrect: false, whyWrong: "Auto-connect increases risk; it does not restrict access." },
+          { text: "Broadcasting SSID publicly for easy discovery", isCorrect: false, whyWrong: "Public SSID broadcast can aid attackers; restriction needs access controls." }
+        ],
+        explainCorrect: "The chapter recommends MAC filtering (with the note that spoofing is still possible)."
+      },
+      {
+        id: "WIFI-Q9",
+        prompt: "What is the key idea behind deploying WIDS/WIPS in a wireless network?",
+        options: [
+          { text: "Monitoring/detecting suspicious activity and attacks (prevention/detection)", isCorrect: true,  whyWrong: "" },
+          { text: "Making the Wi-Fi signal stronger to cover more area", isCorrect: false, whyWrong: "Signal strength relates to coverage; WIDS/WIPS relates to detection/prevention." },
+          { text: "Replacing encryption so passwords are not needed", isCorrect: false, whyWrong: "Monitoring does not replace encryption; both are used together." },
+          { text: "Automatically changing the SSID every hour", isCorrect: false, whyWrong: "SSID change is not what WIDS/WIPS does; it focuses on attack detection/prevention." }
+        ],
+        explainCorrect: "The chapter frames monitoring (WIDS/WIPS) as part of prevention and early detection."
+      },
+      {
+        id: "WIFI-Q10",
+        prompt: "Which option best defines War Driving as described in the chapter?",
+        options: [
+          { text: "Searching/mapping Wi-Fi hotspots while moving (car/bike/walk) to find vulnerable networks", isCorrect: true,  whyWrong: "" },
+          { text: "Upgrading router firmware regularly", isCorrect: false, whyWrong: "Firmware updates are defensive maintenance, not an attack activity." },
+          { text: "Using VPN on public networks", isCorrect: false, whyWrong: "VPN is a protection method, not war driving." },
+          { text: "Blocking anonymous ping requests", isCorrect: false, whyWrong: "That is a firewall policy, not war driving." }
+        ],
+        explainCorrect: "War driving is locating Wi-Fi networks (often to find weak or open ones)."
+      },
+      {
+        id: "WIFI-Q11",
+        prompt: "Which practice is suggested when you do NOT need Wi-Fi for long periods?",
+        options: [
+          { text: "Turn off the router/access point when not in use", isCorrect: true,  whyWrong: "" },
+          { text: "Keep the router on with default password", isCorrect: false, whyWrong: "Leaving defaults increases risk of compromise." },
+          { text: "Disable encryption so devices connect easily", isCorrect: false, whyWrong: "Disabling encryption exposes traffic and access." },
+          { text: "Share your Wi-Fi password openly with strangers", isCorrect: false, whyWrong: "This increases unauthorized usage and liability." }
+        ],
+        explainCorrect: "Turning off the AP reduces the time window available for attackers."
+      },
+      {
+        id: "WIFI-Q12",
+        prompt: "Which option matches the chapter’s enterprise/corporate Wi-Fi best practice?",
+        options: [
+          { text: "Use WPA2 Enterprise with RADIUS authentication (EAP methods) for stronger access control", isCorrect: true,  whyWrong: "" },
+          { text: "Use WEP because it is simpler for employees", isCorrect: false, whyWrong: "WEP is weak and not recommended." },
+          { text: "Allow guest Wi-Fi to directly access corporate internal network", isCorrect: false, whyWrong: "The chapter suggests an isolated guest network." },
+          { text: "Never change keys/passwords once deployed", isCorrect: false, whyWrong: "Periodic key/password change is recommended." }
+        ],
+        explainCorrect: "Enterprise networks require stronger authentication (e.g., RADIUS/EAP) and segmentation."
+      },
+      {
+        id: "WIFI-Q13",
+        prompt: "Which action helps reduce risk when accessing corporate information over public Wi-Fi?",
+        options: [
+          { text: "Use VPN while accessing corporate information from public Wi-Fi", isCorrect: true,  whyWrong: "" },
+          { text: "Disable firewall and antivirus to improve speed", isCorrect: false, whyWrong: "Disabling protections increases compromise risk." },
+          { text: "Use default router credentials for easy access", isCorrect: false, whyWrong: "Default credentials are a major weakness." },
+          { text: "Broadcast SSID publicly to find it quickly", isCorrect: false, whyWrong: "Broadcasting SSID is not a safe practice for security." }
+        ],
+        explainCorrect: "VPN provides an encrypted tunnel, reducing exposure on untrusted networks."
+      },
+      {
+        id: "WIFI-Q14",
+        prompt: "The chapter mentions a major weakness in WPS PIN feature as widely implemented. What is the risk?",
+        options: [
+          { text: "Attackers may recover the WPS PIN and then obtain the WPA/WPA2 password", isCorrect: true,  whyWrong: "" },
+          { text: "WPS forces your SSID to become public forever", isCorrect: false, whyWrong: "SSID broadcast is a separate setting; not the WPS PIN issue." },
+          { text: "WPS automatically disables encryption", isCorrect: false, whyWrong: "WPS does not inherently disable encryption." },
+          { text: "WPS prevents password cracking completely", isCorrect: false, whyWrong: "The chapter notes WPS PIN can introduce a serious weakness." }
+        ],
+        explainCorrect: "WPS PIN recovery can expose the network passphrase, undermining WPA/WPA2 protection."
+      },
+      {
+        id: "WIFI-Q15",
+        prompt: "Which maintenance practice does the chapter recommend to reduce Wi-Fi security loopholes?",
+        options: [
+          { text: "Keep router/access point firmware updated", isCorrect: true,  whyWrong: "" },
+          { text: "Never update firmware to avoid bugs", isCorrect: false, whyWrong: "Avoiding updates leaves known vulnerabilities unpatched." },
+          { text: "Disable encryption during updates permanently", isCorrect: false, whyWrong: "Encryption should remain enabled; updates don’t require leaving it off." },
+          { text: "Use only the default SSID forever", isCorrect: false, whyWrong: "Default SSID can make targeting easier." }
+        ],
+        explainCorrect: "Firmware updates can fix known vulnerabilities and improve device security."
+      }
+    ];
+
+    /******************** SETTINGS ********************/
+    const STORAGE_KEY = "ELIMINATE_TO_WIN_WIFI_SECURITY_V1";
+    const TOAST_MS = 1300;
+    const WIN_TOAST_MS = 1600;
+
+    /******************** STATE ********************/
+    let state = {
+      idx: 0,
+      eliminated: {},
+      attempts: 0,
+      roundsDone: 0,
+      totalElim: 0,
+      completedMap: {}
+    };
+
+    /******************** ELEMENTS ********************/
+    const hudRound = document.getElementById("hudRound");
+    const hudTotal = document.getElementById("hudTotal");
+    const hudElim = document.getElementById("hudElim");
+    const hudAttempts = document.getElementById("hudAttempts");
+
+    const qHeading = document.getElementById("qHeading");
+    const qMeta = document.getElementById("qMeta");
+    const qText = document.getElementById("qText");
+    const optionsGrid = document.getElementById("optionsGrid");
+    const feedbackBox = document.getElementById("feedbackBox");
+
+    const statDone = document.getElementById("statDone");
+    const statElimTotal = document.getElementById("statElimTotal");
+
+    const btnRestart = document.getElementById("btnRestart");
+    const btnResetAll = document.getElementById("btnResetAll");
+    const btnNext = document.getElementById("btnNext");
+    const btnReveal = document.getElementById("btnReveal");
+
+    const toast = document.getElementById("toast");
+    const toastTitle = document.getElementById("toastTitle");
+    const toastText = document.getElementById("toastText");
+
+    const overlay = document.getElementById("overlay");
+    const endTitle = document.getElementById("endTitle");
+    const endSub = document.getElementById("endSub");
+    const endStats = document.getElementById("endStats");
+    const endAnswers = document.getElementById("endAnswers");
+    const btnCloseSummary = document.getElementById("btnCloseSummary");
+    const btnPlayAgain = document.getElementById("btnPlayAgain");
+    const tagDone = document.getElementById("tagDone");
+
+    /******************** UTILS ********************/
+    function letters(i){ return String.fromCharCode(65 + i); }
+    function clampIdx(i){ return Math.max(0, Math.min(QUESTIONS.length - 1, i)); }
+
+    function showToast(kind, title, msg, ms=TOAST_MS){
+      toast.classList.remove("good","bad");
+      if(kind === "good") toast.classList.add("good");
+      if(kind === "bad") toast.classList.add("bad");
+      toastTitle.textContent = title;
+      toastText.textContent = msg;
+      toast.classList.add("show");
+      window.clearTimeout(showToast._t);
+      showToast._t = window.setTimeout(() => toast.classList.remove("show"), ms);
+    }
+
+    function save(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+    function load(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(!raw) return;
+        const obj = JSON.parse(raw);
+        if(typeof obj !== "object" || obj === null) return;
+        state = {
+          idx: clampIdx(Number(obj.idx || 0)),
+          eliminated: obj.eliminated && typeof obj.eliminated === "object" ? obj.eliminated : {},
+          attempts: Number(obj.attempts || 0),
+          roundsDone: Number(obj.roundsDone || 0),
+          totalElim: Number(obj.totalElim || 0),
+          completedMap: obj.completedMap && typeof obj.completedMap === "object" ? obj.completedMap : {}
+        };
+      }catch(e){}
+    }
+    function resetAll(){
+      state = { idx:0, eliminated:{}, attempts:0, roundsDone:0, totalElim:0, completedMap:{} };
+      save();
+      render();
+      showToast("bad","Reset","All progress cleared.");
+    }
+
+    function getElimMapForCurrent(){
+      const q = QUESTIONS[state.idx];
+      if(!state.eliminated[q.id]) state.eliminated[q.id] = {};
+      return state.eliminated[q.id];
+    }
+
+    function countWrongOptions(q){
+      return q.options.filter(o => !o.isCorrect).length;
+    }
+
+    function isRoundComplete(q, elimMap){
+      for(let i=0;i<q.options.length;i++){
+        if(!q.options[i].isCorrect && !elimMap[i]) return false;
+      }
+      return true;
+    }
+
+    function nextRound(){
+      if(state.idx < QUESTIONS.length - 1){
+        state.idx++;
+      }else{
+        const firstIncomplete = QUESTIONS.findIndex(qq => !state.completedMap[qq.id]);
+        state.idx = firstIncomplete >= 0 ? firstIncomplete : 0;
+      }
+      save();
+      render();
+    }
+
+    function restartRound(){
+      const q = QUESTIONS[state.idx];
+      state.eliminated[q.id] = {};
+      save();
+      render();
+      showToast("bad","Restarted","Round restarted. Try again.");
+    }
+
+    function markCompletedIfNeeded(q){
+      if(state.completedMap[q.id]) return;
+      state.completedMap[q.id] = true;
+      state.roundsDone++;
+    }
+
+    function openSummary(){
+      const done = Object.keys(state.completedMap || {}).length;
+      const total = QUESTIONS.length;
+
+      endTitle.textContent = "Game summary";
+      endSub.textContent = `You completed ${done} out of ${total} rounds.`;
+
+      endStats.textContent =
+        `Rounds completed: ${done}/${total}\n` +
+        `Attempts (total clicks): ${state.attempts}\n` +
+        `Wrong options eliminated: ${state.totalElim}`;
+
+      tagDone.textContent = done === total ? "✅ Completed all rounds" : "✅ Summary shown";
+      tagDone.className = "tag " + (done === total ? "good" : "bad");
+
+      endAnswers.innerHTML = "";
+      QUESTIONS.forEach((q) => {
+        const correctIndex = q.options.findIndex(o => o.isCorrect);
+        const div = document.createElement("div");
+        div.className = "review";
+        const qLine = document.createElement("p");
+        qLine.className = "rQ";
+        qLine.innerHTML = `<b>${escapeHTML(q.id)}</b>: ${escapeHTML(q.prompt)}`;
+        const aLine = document.createElement("p");
+        aLine.className = "rA";
+        aLine.innerHTML =
+          `Correct: <b>${letters(correctIndex)}</b> — ${escapeHTML(q.options[correctIndex].text)}<br>` +
+          `<span style="color:var(--muted)">${escapeHTML(q.explainCorrect || "")}</span>`;
+        div.appendChild(qLine);
+        div.appendChild(aLine);
+        endAnswers.appendChild(div);
+      });
+
+      overlay.classList.add("show");
+    }
+
+    function closeSummary(){
+      overlay.classList.remove("show");
+    }
+
+    function escapeHTML(s){
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    /******************** RENDER ********************/
+    function render(){
+      hudTotal.textContent = String(QUESTIONS.length);
+
+      const q = QUESTIONS[state.idx];
+      const elimMap = getElimMapForCurrent();
+
+      hudRound.textContent = String(state.idx + 1);
+      hudElim.textContent = String(Object.keys(elimMap).length);
+      hudAttempts.textContent = String(state.attempts);
+
+      statDone.textContent = String(Object.keys(state.completedMap).length);
+      statElimTotal.textContent = String(state.totalElim);
+
+      qHeading.textContent = `Round ${state.idx + 1}`;
+      qMeta.textContent = `Eliminate ${countWrongOptions(q)} wrong option(s) to win`;
+      qText.textContent = q.prompt;
+
+      feedbackBox.textContent = "Tap an option you believe is wrong to eliminate it.";
+
+      optionsGrid.innerHTML = "";
+      q.options.forEach((opt, i) => {
+        const card = document.createElement("div");
+        card.className = "opt";
+        card.setAttribute("role","listitem");
+        card.setAttribute("tabindex","0");
+
+        const badge = document.createElement("div");
+        badge.className = "badge";
+        badge.textContent = letters(i);
+
+        const txt = document.createElement("div");
+        txt.className = "txt";
+        txt.textContent = opt.text;
+
+        card.appendChild(badge);
+        card.appendChild(txt);
+
+        if(elimMap[i]){
+          card.classList.add("eliminated");
+        }
+
+        const activate = () => onPickOption(i);
+        card.addEventListener("click", activate);
+        card.addEventListener("keydown", (e) => {
+          if(e.key === "Enter" || e.key === " "){
+            e.preventDefault();
+            activate();
+          }
+        });
+
+        optionsGrid.appendChild(card);
+      });
+
+      if(isRoundComplete(q, elimMap)){
+        feedbackBox.textContent = "Round completed. Tap Next round.";
+        showToast("good","Round completed","Only the correct option remains.", WIN_TOAST_MS);
+      }
+
+      btnNext.disabled = !isRoundComplete(q, elimMap);
+      btnNext.style.opacity = btnNext.disabled ? .55 : 1;
+      btnNext.style.cursor = btnNext.disabled ? "not-allowed" : "pointer";
+    }
+
+    /******************** GAME ACTION ********************/
+    function onPickOption(i){
+      const q = QUESTIONS[state.idx];
+      const elimMap = getElimMapForCurrent();
+      const opt = q.options[i];
+
+      state.attempts++;
+
+      if(opt.isCorrect){
+        save();
+        showToast("bad", "Not eliminated", "That one is correct. Keep eliminating the wrong options.");
+        feedbackBox.textContent = "Correct option stays. Eliminate only the wrong ones.";
+        render();
+        return;
+      }
+
+      if(!elimMap[i]){
+        elimMap[i] = true;
+        state.totalElim++;
+      }
+
+      save();
+
+      showToast("good","Eliminated", opt.whyWrong || "Incorrect option eliminated.");
+      feedbackBox.textContent = opt.whyWrong || "Incorrect option eliminated.";
+
+      if(isRoundComplete(q, elimMap)){
+        markCompletedIfNeeded(q);
+        save();
+        showToast("good","You win this round!", q.explainCorrect || "Correct option remains.", WIN_TOAST_MS);
+      }
+
+      render();
+    }
+
+    /******************** EVENTS ********************/
+    btnRestart.addEventListener("click", restartRound);
+    btnResetAll.addEventListener("click", resetAll);
+
+    btnNext.addEventListener("click", () => {
+      const q = QUESTIONS[state.idx];
+      const elimMap = getElimMapForCurrent();
+      if(!isRoundComplete(q, elimMap)){
+        showToast("bad","Complete the round","Eliminate all wrong options first.");
+        return;
+      }
+      nextRound();
+    });
+
+    btnReveal.addEventListener("click", openSummary);
+
+    btnCloseSummary.addEventListener("click", closeSummary);
+    btnPlayAgain.addEventListener("click", () => {
+      closeSummary();
+      state.idx = 0;
+      save();
+      render();
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if(e.key === "Escape" && overlay.classList.contains("show")){
+        closeSummary();
+      }
+    });
+
+    load();
+    render();
+  </script>
+</body>
+</html>
