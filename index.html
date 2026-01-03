@@ -363,7 +363,7 @@
     const QUESTIONS = [
       {
         id: "WIFI-Q1",
-        prompt: "Wireless security mainly depends on which set of factors (as described in the chapter)?",
+        prompt: "Wireless security mainly depends on which set of factors?",
         options: [
           { text: "Encryption strength, monitoring suspicious activity, and user awareness", isCorrect: true,  whyWrong: "" },
           { text: "Only hiding the SSID", isCorrect: false, whyWrong: "SSID hiding alone is not sufficient; the chapter stresses encryption + monitoring + awareness." },
@@ -381,18 +381,18 @@
           { text: "No encryption (open network)", isCorrect: false, whyWrong: "Open networks allow easy sniffing/eavesdropping." },
           { text: "Using SSID as the password", isCorrect: false, whyWrong: "SSID is a network name, not a secure encryption key." }
         ],
-        explainCorrect: "The chapter recommends using WPA2 (stronger than WEP) for better protection."
+        explainCorrect: "WPA2 is stronger than WEP for better protection."
       },
       {
         id: "WIFI-Q3",
-        prompt: "Why is WEP considered insecure according to the chapter?",
+        prompt: "Why is WEP considered insecure?",
         options: [
           { text: "It is known to be broken and can be cracked in minutes/hours", isCorrect: true,  whyWrong: "" },
           { text: "It requires two-factor authentication", isCorrect: false, whyWrong: "WEP does not provide 2FA; it uses shared keys." },
           { text: "It automatically blocks sniffing and war driving", isCorrect: false, whyWrong: "WEP does not reliably prevent sniffing; war driving targets weak networks." },
           { text: "It forces VPN usage by default", isCorrect: false, whyWrong: "VPN is a separate control; WEP does not enforce it." }
         ],
-        explainCorrect: "The chapter explicitly states WEP is weak/broken and can be cracked relatively quickly."
+        explainCorrect: "WEP is weak/broken and can be cracked relatively quickly."
       },
       {
         id: "WIFI-Q4",
@@ -407,7 +407,7 @@
       },
       {
         id: "WIFI-Q5",
-        prompt: "Why does the chapter advise disabling auto-connect to available networks?",
+        prompt: "Why it is advised to disable auto-connect to available networks?",
         options: [
           { text: "It reduces risk of connecting to rogue APs / phishing hotspots", isCorrect: true,  whyWrong: "" },
           { text: "It increases Wi-Fi speed automatically", isCorrect: false, whyWrong: "Auto-connect is not a speed feature; it is a connection behavior." },
@@ -418,7 +418,7 @@
       },
       {
         id: "WIFI-Q6",
-        prompt: "Which statement best matches the chapter’s guidance on public Wi-Fi?",
+        prompt: "Which statement best matches the guidance on public Wi-Fi?",
         options: [
           { text: "Avoid using public Wi-Fi for sensitive websites because traffic may be sniffed or sessions hijacked", isCorrect: true,  whyWrong: "" },
           { text: "Public Wi-Fi is always encrypted, so it is safest for banking", isCorrect: false, whyWrong: "The chapter notes many public networks are open/unencrypted, enabling sniffing." },
@@ -447,7 +447,7 @@
           { text: "Turning on auto-connect", isCorrect: false, whyWrong: "Auto-connect increases risk; it does not restrict access." },
           { text: "Broadcasting SSID publicly for easy discovery", isCorrect: false, whyWrong: "Public SSID broadcast can aid attackers; restriction needs access controls." }
         ],
-        explainCorrect: "The chapter recommends MAC filtering (with the note that spoofing is still possible)."
+        explainCorrect: "MAC filtering (with the note that spoofing is still possible)."
       },
       {
         id: "WIFI-Q9",
@@ -458,11 +458,11 @@
           { text: "Replacing encryption so passwords are not needed", isCorrect: false, whyWrong: "Monitoring does not replace encryption; both are used together." },
           { text: "Automatically changing the SSID every hour", isCorrect: false, whyWrong: "SSID change is not what WIDS/WIPS does; it focuses on attack detection/prevention." }
         ],
-        explainCorrect: "The chapter frames monitoring (WIDS/WIPS) as part of prevention and early detection."
+        explainCorrect: "Monitoring (WIDS/WIPS) as part of prevention and early detection."
       },
       {
         id: "WIFI-Q10",
-        prompt: "Which option best defines War Driving as described in the chapter?",
+        prompt: "Which option best defines War Driving?",
         options: [
           { text: "Searching/mapping Wi-Fi hotspots while moving (car/bike/walk) to find vulnerable networks", isCorrect: true,  whyWrong: "" },
           { text: "Upgrading router firmware regularly", isCorrect: false, whyWrong: "Firmware updates are defensive maintenance, not an attack activity." },
@@ -484,7 +484,7 @@
       },
       {
         id: "WIFI-Q12",
-        prompt: "Which option matches the chapter’s enterprise/corporate Wi-Fi best practice?",
+        prompt: "Which option matches the enterprise/corporate Wi-Fi best practice?",
         options: [
           { text: "Use WPA2 Enterprise with RADIUS authentication (EAP methods) for stronger access control", isCorrect: true,  whyWrong: "" },
           { text: "Use WEP because it is simpler for employees", isCorrect: false, whyWrong: "WEP is weak and not recommended." },
@@ -506,7 +506,7 @@
       },
       {
         id: "WIFI-Q14",
-        prompt: "The chapter mentions a major weakness in WPS PIN feature as widely implemented. What is the risk?",
+        prompt: "A major weakness in WPS PIN feature as widely implemented. What is the risk?",
         options: [
           { text: "Attackers may recover the WPS PIN and then obtain the WPA/WPA2 password", isCorrect: true,  whyWrong: "" },
           { text: "WPS forces your SSID to become public forever", isCorrect: false, whyWrong: "SSID broadcast is a separate setting; not the WPS PIN issue." },
@@ -517,7 +517,7 @@
       },
       {
         id: "WIFI-Q15",
-        prompt: "Which maintenance practice does the chapter recommend to reduce Wi-Fi security loopholes?",
+        prompt: "Which maintenance practice is recommended to reduce Wi-Fi security loopholes?",
         options: [
           { text: "Keep router/access point firmware updated", isCorrect: true,  whyWrong: "" },
           { text: "Never update firmware to avoid bugs", isCorrect: false, whyWrong: "Avoiding updates leaves known vulnerabilities unpatched." },
